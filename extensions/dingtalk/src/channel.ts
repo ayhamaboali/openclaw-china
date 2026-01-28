@@ -278,15 +278,27 @@ export const dingtalkPlugin = {
       ctx.log?.info(`[dingtalk] starting provider for account ${ctx.accountId}`);
 
       if (ctx.runtime) {
-        setDingtalkRuntime(ctx.runtime as Record<string, unknown>);
+        const candidate = ctx.runtime as {
+          channel?: {
+            routing?: { resolveAgentRoute?: unknown };
+            reply?: { dispatchReplyFromConfig?: unknown };
+          };
+        };
+        if (
+          candidate.channel?.routing?.resolveAgentRoute &&
+          candidate.channel?.reply?.dispatchReplyFromConfig
+        ) {
+          setDingtalkRuntime(ctx.runtime as Record<string, unknown>);
+        }
       }
 
       return monitorDingtalkProvider({
         config: ctx.cfg,
-        runtime: (ctx.runtime as { log?: (msg: string) => void; error?: (msg: string) => void }) ?? {
+        runtime:
+          (ctx.runtime as { log?: (msg: string) => void; error?: (msg: string) => void }) ?? {
           log: ctx.log?.info ?? console.log,
           error: ctx.log?.error ?? console.error,
-        },
+          },
         abortSignal: ctx.abortSignal,
         accountId: ctx.accountId,
       });
