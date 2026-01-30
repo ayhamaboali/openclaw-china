@@ -8,12 +8,12 @@
 
 [快速开始](#快速开始)
 
-| 平台 | 状态 | 插件 |
-|------|:----:|------|
-| 钉钉 | ✅ 可用 | `@openclaw-china/dingtalk` |
-| 飞书 | 🚧 开发中 | - |
-| 企业微信 | 🚧 开发中 | - |
-| QQ 机器人 | 🚧 开发中 | - |
+| 平台 | 状态 |
+|------|:----:|
+| 钉钉 | ✅ 可用 |
+| 飞书 | 🚧 开发中 |
+| 企业微信 | 🚧 开发中 |
+| QQ 机器人 | 🚧 开发中 |
 
 ## 演示
 
@@ -27,26 +27,17 @@
 
 ### 安装
 
-**推荐：安装统一包（包含所有渠道）**
+**安装统一包（包含所有渠道）**
 
 ```bash
-# Clawdbot
 clawdbot plugins install @openclaw-china/channels
-
-# 或 Moltbot
-moltbot plugins install @openclaw-china/channels
 ```
 
-**或者：安装单个渠道**
+**或者：安装单个渠道（不要和统一包同时安装）**
 
 ```bash
-# Clawdbot
 clawdbot plugins install @openclaw-china/dingtalk
-# 或 Moltbot
-moltbot plugins install @openclaw-china/dingtalk
 ```
-
-
 
 ### 钉钉配置
 
@@ -59,16 +50,6 @@ Clawdbot:
 
 ```bash
 clawdbot config set channels.dingtalk '{
-  "enabled": true,
-  "clientId": "dingxxxxxx",
-  "clientSecret": "your-app-secret"
-}' --json
-```
-
-Moltbot:
-
-```bash
-moltbot config set channels.dingtalk '{
   "enabled": true,
   "clientId": "dingxxxxxx",
   "clientSecret": "your-app-secret"
@@ -98,8 +79,6 @@ moltbot config set channels.dingtalk '{
 
 ```bash
 clawdbot gateway restart
-# 或
-moltbot gateway restart
 ```
 
 ## 配置选项
@@ -141,10 +120,11 @@ cd moltbot-china
 pnpm install
 pnpm build
 
-# 以链接模式安装（修改代码后实时生效）
-clawdbot plugins install -l ./extensions/dingtalk
-# 或
-moltbot plugins install -l ./extensions/dingtalk
+# 以链接模式安装（修改代码后实时生效，二选一）
+clawdbot plugins install -l ./packages/channels
+
+# 单渠道开发时：
+# clawdbot plugins install -l ./extensions/dingtalk
 ```
 
 配置中添加：
@@ -152,10 +132,10 @@ moltbot plugins install -l ./extensions/dingtalk
 ```
   "plugins": {
     "load": {
-      "paths": ["/path/to/moltbot-china/extensions/dingtalk"]
+      "paths": ["/path/to/moltbot-china/packages/channels"]
     },
     "entries": {
-      "dingtalk": { "enabled": true }
+      "channels": { "enabled": true }
     }
   }
 ```
