@@ -38,6 +38,21 @@ const MESSAGE_DEDUPE_TTL_MS = 60 * 1000; // 60秒过期
 // 消息过期时间（30分钟）
 const MESSAGE_EXPIRE_TTL_MS = 30 * 60 * 1000;
 
+// 连接健康检查
+const WATCHDOG_INTERVAL_MS = 10000;
+const CONNECT_GRACE_MS = 30000;
+const MIN_RECONNECT_INTERVAL_MS = 10000;
+
+type FeishuWsInstance = {
+  readyState?: number;
+  terminate?: () => void;
+};
+
+type FeishuWsClientInternal = {
+  wsConfig?: { getWSInstance?: () => FeishuWsInstance | null };
+  reConnect?: (isStart?: boolean) => void;
+};
+
 function cleanupDedupeCache(): void {
   const now = Date.now();
   for (const [messageId, timestamp] of processedMessages) {
@@ -111,8 +126,40 @@ export async function startFeishuGateway(opts: FeishuGatewayOptions = {}): Promi
 
   currentPromise = new Promise<void>((resolve, reject) => {
     let stopped = false;
+    let watchdogId: ReturnType<typeof setInterval> | null = null;
+    let connectStartedAt = Date.now();
+    let lastOpenAt: number | null = null;
+    let lastReconnectAt = 0;
+
+    const getWsInstance = (): FeishuWsInstance | null => {
+      const clientAny = wsClient as unknown as FeishuWsClientInternal;
+      return clientAny.wsConfig?.getWSInstance?.() ?? null;
+    };
+
+    const forceReconnect = (reason: string) => {
+      const now = Date.now();
+      if (now - lastReconnectAt < MIN_RECONNECT_INTERVAL_MS) {
+        return;
+      }
+      lastReconnectAt = now;
+      logger.warn(`[gateway] forcing reconnect: ${reason}`);
+      try {
+        const clientAny = wsClient as unknown as FeishuWsClientInternal;
+        if (typeof clientAny.reConnect === "function") {
+          clientAny.reConnect(true);
+          return;
+        }
+        getWsInstance()?.terminate?.();
+      } catch (err) {
+        logger.error(`failed to force reconnect: ${String(err)}`);
+      }
+    };
 
     const cleanup = () => {
+      if (watchdogId) {
+        clearInterval(watchdogId);
+        watchdogId = null;
+      }
       if (currentClient === wsClient) {
         currentClient = null;
         currentAccountId = null;
@@ -165,45 +212,69 @@ export async function startFeishuGateway(opts: FeishuGatewayOptions = {}): Promi
     abortSignal?.addEventListener("abort", handleAbort, { once: true });
 
     try {
-      wsClient.start({
-        eventDispatcher: new lark.EventDispatcher({}).register({
-          "im.message.receive_v1": async (data: unknown) => {
-            const event = data as FeishuMessageEvent;
-            const message = event.message;
-            if (!message) return {};
+      const eventDispatcher = new lark.EventDispatcher({}).register({
+        "im.message.receive_v1": async (data: unknown) => {
+          const event = data as FeishuMessageEvent;
+          const message = event.message;
+          if (!message) return {};
 
-            const messageId = message.message_id ?? "";
+          const messageId = message.message_id ?? "";
 
-            if (isDuplicateMessage(messageId)) {
-              return {};
-            }
-
-            if (isMessageExpired(message.create_time)) {
-              logger.info(`skipping expired message ${messageId}`);
-              return {};
-            }
-
-            const contentPreview = message.content ? message.content.slice(0, 80) : "";
-            logger.info(`Inbound: chat=${message.chat_id ?? ""} type=${message.message_type ?? ""} text="${contentPreview}"`);
-
-            setImmediate(() => {
-              void handleFeishuMessage({
-                cfg: config,
-                event,
-                accountId,
-                log: (msg: string) => logger.info(msg.replace(/^\[feishu\]\s*/, "")),
-                error: (msg: string) => logger.error(msg.replace(/^\[feishu\]\s*/, "")),
-              }).catch((err) => {
-                logger.error(`error handling message: ${String(err)}`);
-              });
-            });
-
+          if (isDuplicateMessage(messageId)) {
             return {};
-          },
-        }),
+          }
+
+          if (isMessageExpired(message.create_time)) {
+            logger.info(`skipping expired message ${messageId}`);
+            return {};
+          }
+
+          const contentPreview = message.content ? message.content.slice(0, 80) : "";
+          logger.info(
+            `Inbound: chat=${message.chat_id ?? ""} type=${message.message_type ?? ""} text="${contentPreview}"`,
+          );
+
+          setImmediate(() => {
+            void handleFeishuMessage({
+              cfg: config,
+              event,
+              accountId,
+              log: (msg: string) => logger.info(msg.replace(/^\[feishu\]\s*/, "")),
+              error: (msg: string) => logger.error(msg.replace(/^\[feishu\]\s*/, "")),
+            }).catch((err) => {
+              logger.error(`error handling message: ${String(err)}`);
+            });
+          });
+
+          return {};
+        },
       });
 
-      logger.info("WebSocket client connected");
+      wsClient.start({
+        eventDispatcher,
+      });
+
+      // Start watchdog to detect stalled connections.
+      connectStartedAt = Date.now();
+      lastOpenAt = null;
+      watchdogId = setInterval(() => {
+        if (stopped) return;
+        const wsInstance = getWsInstance();
+        const readyState = wsInstance?.readyState;
+        if (readyState === 1) {
+          lastOpenAt = Date.now();
+          return;
+        }
+
+        const lastSeen = lastOpenAt ?? connectStartedAt;
+        if (Date.now() - lastSeen > CONNECT_GRACE_MS) {
+          forceReconnect("ws not open");
+          connectStartedAt = Date.now();
+          lastOpenAt = null;
+        }
+      }, WATCHDOG_INTERVAL_MS);
+
+      logger.info("WebSocket client start invoked");
     } catch (err) {
       logger.error(`failed to start WebSocket connection: ${String(err)}`);
       finalizeReject(err);
