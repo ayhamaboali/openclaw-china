@@ -212,7 +212,7 @@ export async function dispatchWecomMessage(params: {
   const mediaResult = await processMediaInMessage({
     msg,
     encodingAESKey: account.encodingAESKey,
-    log: logger.debug,
+    log: logger,
   });
 
   const rawBody = mediaResult.text;
@@ -440,18 +440,30 @@ export async function downloadAndDecryptMedia(params: {
   // 步骤 3: 保存到按月归档目录
 
   // 从 Content-Disposition 响应头中提取原始文件名
-  let originalFileName = fileName;
+  const sanitizeFileName = (input?: string): string | undefined => {
+    if (!input) return undefined;
+    const base = path.basename(input);
+    const cleaned = base
+      .replace(/[\\\/]+/g, "_")
+      .replace(/[\x00-\x1f\x7f]/g, "")
+      .trim();
+    if (!cleaned || cleaned === "." || cleaned === "..") return undefined;
+    return cleaned.length > 200 ? cleaned.slice(0, 200) : cleaned;
+  };
+
+  let originalFileName = sanitizeFileName(fileName);
   if (contentDisposition && !originalFileName) {
     // 解析 Content-Disposition: attachment; filename="文件名.jpg"
     const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
     if (filenameMatch && filenameMatch[1]) {
-      originalFileName = filenameMatch[1].replace(/['"]/g, ''); // 移除引号
+      let headerFileName = filenameMatch[1].replace(/['"]/g, ""); // 移除引号
       // 尝试解码 URL 编码的文件名
       try {
-        originalFileName = decodeURIComponent(originalFileName);
+        headerFileName = decodeURIComponent(headerFileName);
       } catch {
         // 如果解码失败，使用原始值
       }
+      originalFileName = sanitizeFileName(headerFileName);
     }
   }
 
@@ -482,15 +494,19 @@ export async function downloadAndDecryptMedia(params: {
   const baseNameWithoutExt = baseFileName.replace(/\.[-.\w]+$/, '');
   const timestamp = Date.now();
   const safeFileName = `${baseNameWithoutExt}-${timestamp}${extension}`;
-  const tempFilePath = path.join(wecomDir, safeFileName);
+  const resolvedDir = path.resolve(wecomDir);
+  const resolvedPath = path.resolve(wecomDir, safeFileName);
+  if (!resolvedPath.startsWith(`${resolvedDir}${path.sep}`) && resolvedPath !== resolvedDir) {
+    throw new Error("Invalid media file path");
+  }
 
-  await fsPromises.writeFile(tempFilePath, decryptedBuffer);
+  await fsPromises.writeFile(resolvedPath, decryptedBuffer);
 
-  log?.debug?.(`[wecom] 文件已保存: ${tempFilePath}`);
+  log?.debug?.(`[wecom] 文件已保存: ${resolvedPath}`);
 
   // 返回文件信息（不再提供清理函数，文件保留供后续使用）
   return {
-    path: tempFilePath,
+    path: resolvedPath,
     contentType,
     size: decryptedBuffer.length,
     fileName,
