@@ -256,8 +256,8 @@ export const wecomAppPlugin = {
         if (raw.startsWith(prefix)) return false;
       }
 
-      // 只接受 user: 或 group: 前缀的格式，拒绝裸 ID
-      return raw.startsWith("user:") || raw.startsWith("group:");
+      // 接受 user:/group: 前缀或裸 ID（裸 ID 会自动转换为 user:）
+      return true;
     },
 
     /**
@@ -276,8 +276,9 @@ export const wecomAppPlugin = {
       // The OpenClaw message routing layer may pass targets in different shapes:
       // - "wecom-app:user:xxx" or "wecom-app:group:xxx" (fully-qualified with type)
       // - "user:xxx" or "group:xxx" (type-prefixed, bare)
+      // - "xxx" (bare ID, auto-converted to "user:xxx" for Agent compatibility)
       // - "xxx@accountId" (with account selector)
-      // We NO LONGER accept bare IDs (e.g., "xxx") to avoid ambiguity.
+      // We accept bare IDs and auto-convert them to "user:xxx" to support Agent behavior.
 
       let raw = (params.target ?? "").trim();
       if (!raw) return null;
@@ -311,9 +312,10 @@ export const wecomAppPlugin = {
         return { channel: "wecom-app", accountId, to };
       }
 
-      // 4. 不支持裸 ID 格式，返回 null
-      // 这将导致 OpenClaw 报错 "Unknown target"，提示用户使用正确的格式
-      return null;
+      // 4. 兼容裸 ID 格式（自动添加 user: 前缀）
+      // 注意：这是为了兼容 Agent 可能发送的裸 ID 格式
+      // 建议在 Agent 系统提示中明确要求使用 user: 或 group: 前缀
+      return { channel: "wecom-app", accountId, to: `user:${to}` };
     },
 
     /**
@@ -356,6 +358,7 @@ export const wecomAppPlugin = {
       "wecom-app:group:<chatId>",
       "user:<userId>",
       "group:<chatId>",
+      "<userId>",  // 裸 ID 会自动转换为 user:<userId>
     ],
   },
 
