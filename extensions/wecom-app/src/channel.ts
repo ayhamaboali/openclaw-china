@@ -506,6 +506,18 @@ export const wecomAppPlugin = {
           result = await downloadAndSendVoice(account, target, params.mediaUrl);
         } else {
           // 文件/其他: 下载 → 上传素材 → 发送
+          // NOTE: 企业微信“文件消息”接口只接收 media_id，客户端经常不展示真实文件名。
+          // 我们在上传时会尽量带上 filename，但展示层可能仍固定为 file.<ext>。
+          // 为了让用户看到真实文件名：如果上游提供了 text/caption，则先补发一条文本说明。
+          if (params.text?.trim()) {
+            try {
+              console.log(`[wecom-app] Sending caption text before file: ${params.text}`);
+              await sendWecomAppMessage(account, target, params.text);
+            } catch (err) {
+              console.warn(`[wecom-app] Failed to send caption before file:`, err);
+            }
+          }
+
           console.log(`[wecom-app] Routing to downloadAndSendFile`);
           result = await downloadAndSendFile(account, target, params.mediaUrl);
         }
