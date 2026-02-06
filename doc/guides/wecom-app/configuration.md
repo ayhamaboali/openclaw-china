@@ -490,6 +490,27 @@ curl ifconfig.me
 }
 ```
 
+> 提示：
+> - 多账号共用同一路径/Token 时，系统会优先按入站消息里的 `AgentID` 匹配账号 `agentId`。
+> - 若仍存在多候选，会记录告警并回退第一个匹配账号。
+> - 为减少歧义，建议每个账号使用独立的 `webhookPath` / `token` / `encodingAESKey`。
+
+多 agent 分流（bindings）示例：
+```json
+{
+  "bindings": [
+    { "agentId": "main", "match": { "channel": "wecom-app", "accountId": "app" } },
+    { "agentId": "work", "match": { "channel": "wecom-app", "accountId": "app1" } }
+  ]
+}
+```
+> 说明：如果只用默认 `main`，可以不配置 `bindings`；多账号分流到不同 agent 时必须配置。
+
+开发验证：
+```bash
+pnpm -C extensions/wecom-app test
+```
+
 ---
 
 ## （可选）安装 wecom-app 运维/使用 Skill
