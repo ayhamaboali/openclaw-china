@@ -12,11 +12,11 @@ import { setFeishuRuntime } from "./runtime.js";
 export const DEFAULT_ACCOUNT_ID = "default";
 
 const meta = {
-  id: "feishu",
+  id: "feishu-china",
   label: "Feishu",
   selectionLabel: "Feishu/Lark (飞书)",
-  docsPath: "/channels/feishu",
-  docsLabel: "feishu",
+  docsPath: "/channels/feishu-china",
+  docsLabel: "feishu-china",
   blurb: "飞书/Lark 企业消息",
   aliases: ["lark"],
   order: 70,
@@ -24,7 +24,7 @@ const meta = {
 
 interface PluginConfig {
   channels?: {
-    feishu?: FeishuConfig;
+    "feishu-china"?: FeishuConfig;
   };
 }
 
@@ -33,7 +33,7 @@ function resolveFeishuAccount(params: {
   accountId?: string;
 }): ResolvedFeishuAccount {
   const { cfg, accountId = DEFAULT_ACCOUNT_ID } = params;
-  const feishuCfg = cfg.channels?.feishu;
+  const feishuCfg = cfg.channels?.["feishu-china"];
 
   const parsed = feishuCfg ? FeishuConfigSchema.safeParse(feishuCfg) : null;
   const config = parsed?.success ? parsed.data : undefined;
@@ -50,7 +50,7 @@ function resolveFeishuAccount(params: {
 }
 
 export const feishuPlugin = {
-  id: "feishu",
+  id: "feishu-china",
 
   meta: {
     ...meta,
@@ -87,7 +87,7 @@ export const feishuPlugin = {
     },
   },
 
-  reload: { configPrefixes: ["channels.feishu"] },
+  reload: { configPrefixes: ["channels.feishu-china"] },
 
   config: {
     listAccountIds: (_cfg: PluginConfig): string[] => [DEFAULT_ACCOUNT_ID],
@@ -98,12 +98,12 @@ export const feishuPlugin = {
     defaultAccountId: (): string => DEFAULT_ACCOUNT_ID,
 
     setAccountEnabled: (params: { cfg: PluginConfig; enabled: boolean }): PluginConfig => {
-      const existingConfig = params.cfg.channels?.feishu ?? {};
+      const existingConfig = params.cfg.channels?.["feishu-china"] ?? {};
       return {
         ...params.cfg,
         channels: {
           ...params.cfg.channels,
-          feishu: {
+          "feishu-china": {
             ...existingConfig,
             enabled: params.enabled,
           } as FeishuConfig,
@@ -114,7 +114,7 @@ export const feishuPlugin = {
     deleteAccount: (params: { cfg: PluginConfig }): PluginConfig => {
       const next = { ...params.cfg };
       const nextChannels = { ...params.cfg.channels };
-      delete (nextChannels as Record<string, unknown>).feishu;
+      delete (nextChannels as Record<string, unknown>)["feishu-china"];
       if (Object.keys(nextChannels).length > 0) {
         next.channels = nextChannels;
       } else {
@@ -124,7 +124,7 @@ export const feishuPlugin = {
     },
 
     isConfigured: (_account: ResolvedFeishuAccount, cfg: PluginConfig): boolean =>
-      isConfigured(cfg.channels?.feishu),
+      isConfigured(cfg.channels?.["feishu-china"]),
 
     describeAccount: (account: ResolvedFeishuAccount) => ({
       accountId: account.accountId,
@@ -133,7 +133,7 @@ export const feishuPlugin = {
     }),
 
     resolveAllowFrom: (params: { cfg: PluginConfig }): string[] =>
-      params.cfg.channels?.feishu?.allowFrom ?? [],
+      params.cfg.channels?.["feishu-china"]?.allowFrom ?? [],
 
     formatAllowFrom: (params: { allowFrom: (string | number)[] }): string[] =>
       params.allowFrom
@@ -144,11 +144,11 @@ export const feishuPlugin = {
 
   security: {
     collectWarnings: (params: { cfg: PluginConfig }): string[] => {
-      const feishuCfg = params.cfg.channels?.feishu;
+      const feishuCfg = params.cfg.channels?.["feishu-china"];
       const groupPolicy = feishuCfg?.groupPolicy ?? "allowlist";
       if (groupPolicy !== "open") return [];
       return [
-        `- Feishu groups: groupPolicy="open" allows any member to trigger (mention-gated). Set channels.feishu.groupPolicy="allowlist" + channels.feishu.groupAllowFrom to restrict senders.`,
+        `- Feishu groups: groupPolicy="open" allows any member to trigger (mention-gated). Set channels.feishu-china.groupPolicy="allowlist" + channels.feishu-china.groupAllowFrom to restrict senders.`,
       ];
     },
   },
@@ -156,12 +156,12 @@ export const feishuPlugin = {
   setup: {
     resolveAccountId: (): string => DEFAULT_ACCOUNT_ID,
     applyAccountConfig: (params: { cfg: PluginConfig }): PluginConfig => {
-      const existingConfig = params.cfg.channels?.feishu ?? {};
+      const existingConfig = params.cfg.channels?.["feishu-china"] ?? {};
       return {
         ...params.cfg,
         channels: {
           ...params.cfg.channels,
-          feishu: {
+          "feishu-china": {
             ...existingConfig,
             enabled: true,
           } as FeishuConfig,

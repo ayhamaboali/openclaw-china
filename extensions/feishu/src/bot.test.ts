@@ -195,7 +195,7 @@ describe("Feature: feishu-integration, Property 4: 上下文构建完整性", ()
         expect(inboundCtx.Timestamp).toBeGreaterThan(0);
         expect(inboundCtx.WasMentioned).toBe(ctx.mentionedBot);
         expect(inboundCtx.CommandAuthorized).toBe(true);
-        expect(inboundCtx.OriginatingChannel).toBe("feishu");
+        expect(inboundCtx.OriginatingChannel).toBe("feishu-china");
         expect(inboundCtx.OriginatingTo).toBeDefined();
       }),
       { numRuns: 100 }

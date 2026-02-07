@@ -14,7 +14,7 @@ import { handleFeishuMessage } from "./bot.js";
 export interface FeishuGatewayOptions {
   config?: {
     channels?: {
-      feishu?: FeishuConfig;
+      "feishu-china"?: FeishuConfig;
     };
   };
   runtime?: {
@@ -104,7 +104,7 @@ export async function startFeishuGateway(opts: FeishuGatewayOptions = {}): Promi
     throw new Error("Feishu gateway state invalid: active client without promise");
   }
 
-  const feishuCfg = config?.channels?.feishu;
+  const feishuCfg = config?.channels?.["feishu-china"];
   if (!feishuCfg) {
     throw new Error("Feishu configuration not found");
   }

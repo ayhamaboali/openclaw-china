@@ -127,7 +127,7 @@ export interface ChannelConfig {
 export interface MoltbotConfig {
   channels?: {
     dingtalk?: ChannelConfig;
-    feishu?: ChannelConfig;
+    "feishu-china"?: ChannelConfig;
     wecom?: ChannelConfig;
     "wecom-app"?: ChannelConfig;
     qqbot?: ChannelConfig;
@@ -150,7 +150,7 @@ export interface MoltbotPluginApi {
 /**
  * 支持的渠道列表
  */
-export const SUPPORTED_CHANNELS = ["dingtalk", "feishu", "wecom", "wecom-app", "qqbot"] as const;
+export const SUPPORTED_CHANNELS = ["dingtalk", "feishu-china", "wecom", "wecom-app", "qqbot"] as const;
 // TODO: 后续添加 "qq"
 
 export type SupportedChannel = (typeof SUPPORTED_CHANNELS)[number];
@@ -161,7 +161,7 @@ const channelPlugins: Record<SupportedChannel, { register: (api: MoltbotPluginAp
       dingtalkEntry.register(api);
     },
   },
-  feishu: {
+  "feishu-china": {
     register: (api: MoltbotPluginApi) => {
       feishuEntry.register(api);
     },

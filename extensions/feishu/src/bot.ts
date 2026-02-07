@@ -118,7 +118,7 @@ export interface InboundContext {
   Timestamp: number;
   WasMentioned: boolean;
   CommandAuthorized: boolean;
-  OriginatingChannel: "feishu";
+  OriginatingChannel: "feishu-china";
   OriginatingTo: string;
 }
 
@@ -156,7 +156,7 @@ export function buildInboundContext(
     Timestamp: Date.now(),
     WasMentioned: ctx.mentionedBot,
     CommandAuthorized: true,
-    OriginatingChannel: "feishu",
+    OriginatingChannel: "feishu-china",
     OriginatingTo: to,
   };
 }
@@ -189,14 +189,14 @@ export async function handleFeishuMessage(params: {
   }
 
   const feishuCfg = (cfg as Record<string, unknown>)?.channels as Record<string, unknown> | undefined;
-  const rawChannelCfg = feishuCfg?.feishu as FeishuConfig | undefined;
+  const rawChannelCfg = feishuCfg?.["feishu-china"] as FeishuConfig | undefined;
   const parsedCfg = rawChannelCfg ? FeishuConfigSchema.safeParse(rawChannelCfg) : null;
   if (parsedCfg && !parsedCfg.success) {
     logger.warn(`invalid feishu config, using raw values: ${parsedCfg.error.message}`);
   }
   const channelCfg = parsedCfg?.success ? parsedCfg.data : rawChannelCfg;
   logger.debug(
-    `config snapshot: channels.feishu=${channelCfg ? "present" : "missing"}, sendMarkdownAsCard=${
+    `config snapshot: channels.feishu-china=${channelCfg ? "present" : "missing"}, sendMarkdownAsCard=${
       channelCfg?.sendMarkdownAsCard ?? "undefined"
     }`
   );
@@ -262,7 +262,7 @@ export async function handleFeishuMessage(params: {
 
     const route = core.channel.routing.resolveAgentRoute({
       cfg,
-      channel: "feishu",
+      channel: "feishu-china",
       peer: {
         kind: isGroup ? "group" : "dm",
         id: isGroup ? ctx.chatId : ctx.senderId,
@@ -301,10 +301,10 @@ export async function handleFeishuMessage(params: {
     const textChunkLimit =
       textApi?.resolveTextChunkLimit?.({
         cfg,
-        channel: "feishu",
+        channel: "feishu-china",
         defaultLimit: channelCfg.textChunkLimit ?? 4000,
       }) ?? (channelCfg.textChunkLimit ?? 4000);
-    const chunkMode = textApi?.resolveChunkMode?.(cfg, "feishu");
+    const chunkMode = textApi?.resolveChunkMode?.(cfg, "feishu-china");
 
     const replyFinalOnly = channelCfg.replyFinalOnly !== false;
     const isHttpUrl = (value: string): boolean => /^https?:\/\//i.test(value);

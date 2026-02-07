@@ -293,10 +293,10 @@ openclaw config set channels.wecom.encodingAESKey your-43-char-encoding-aes-key
 openclaw:
 
 ```bash
-openclaw config set channels.feishu.enabled true
-openclaw config set channels.feishu.appId cli_xxxxxx
-openclaw config set channels.feishu.appSecret your-app-secret
-openclaw config set channels.feishu.sendMarkdownAsCard true
+openclaw config set channels.feishu-china.enabled true
+openclaw config set channels.feishu-china.appId cli_xxxxxx
+openclaw config set channels.feishu-china.appSecret your-app-secret
+openclaw config set channels.feishu-china.sendMarkdownAsCard true
 ```
 
 </details>
@@ -382,7 +382,7 @@ openclaw plugins install -l ./packages/channels
       "appId": "your-app-id",
       "clientSecret": "your-app-secret"
     },
-    "feishu": {
+    "feishu-china": {
       "enabled": true,
       "appId": "cli_xxxxxx",
       "appSecret": "your-app-secret"

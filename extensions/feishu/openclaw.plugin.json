@@ -1,9 +1,9 @@
 {
-  "id": "feishu",
+  "id": "feishu-china",
   "name": "Feishu",
   "description": "飞书/Lark 消息渠道插件",
   "version": "0.1.5",
-  "channels": ["feishu"],
+  "channels": ["feishu-china"],
   "configSchema": {
     "type": "object",
     "additionalProperties": false,

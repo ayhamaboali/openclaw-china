@@ -48,7 +48,7 @@ export type { FeishuConfig, ResolvedFeishuAccount, FeishuSendResult } from "./sr
  * - register: 注册函数，调用 api.registerChannel 并设置 runtime
  */
 const plugin = {
-  id: "feishu",
+  id: "feishu-china",
   name: "Feishu",
   description: "飞书/Lark 消息渠道插件",
   configSchema: {

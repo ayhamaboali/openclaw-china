@@ -11,7 +11,7 @@ import * as fs from "node:fs";
 
 export interface OutboundConfig {
   channels?: {
-    feishu?: FeishuConfig;
+    "feishu-china"?: FeishuConfig;
   };
 }
 
@@ -56,7 +56,7 @@ export const feishuOutbound = {
   sendText: async (params: { cfg: OutboundConfig; to: string; text: string }): Promise<SendResult> => {
     const { cfg, to, text } = params;
 
-    const rawFeishuCfg = cfg.channels?.feishu;
+    const rawFeishuCfg = cfg.channels?.["feishu-china"];
     const parsedCfg = rawFeishuCfg ? FeishuConfigSchema.safeParse(rawFeishuCfg) : null;
     const feishuCfg = parsedCfg?.success ? parsedCfg.data : rawFeishuCfg;
     if (!feishuCfg) {
@@ -161,7 +161,7 @@ export const feishuOutbound = {
     }
 
     return {
-      channel: "feishu",
+      channel: "feishu-china",
       messageId: result.messageId,
       chatId: result.chatId,
       conversationId: result.chatId,
@@ -176,7 +176,7 @@ export const feishuOutbound = {
   }): Promise<SendResult> => {
     const { cfg, to, text, mediaUrl } = params;
 
-    const feishuCfg = cfg.channels?.feishu;
+    const feishuCfg = cfg.channels?.["feishu-china"];
     if (!feishuCfg) {
       throw new Error("Feishu channel not configured");
     }
@@ -213,7 +213,7 @@ export const feishuOutbound = {
               receiveIdType,
             });
         return {
-          channel: "feishu",
+          channel: "feishu-china",
           messageId: result.messageId,
           chatId: result.chatId,
           conversationId: result.chatId,
@@ -228,7 +228,7 @@ export const feishuOutbound = {
           receiveIdType,
         });
         return {
-          channel: "feishu",
+          channel: "feishu-china",
           messageId: result.messageId,
           chatId: result.chatId,
           conversationId: result.chatId,
@@ -237,7 +237,7 @@ export const feishuOutbound = {
     }
 
     return {
-      channel: "feishu",
+      channel: "feishu-china",
       messageId: text?.trim() ? `text_${Date.now()}` : "empty",
       chatId: targetId,
       conversationId: targetId,

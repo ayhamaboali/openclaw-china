@@ -15,10 +15,10 @@
       "./dist/index.js"
     ],
     "channel": {
-      "id": "feishu",
+      "id": "feishu-china",
       "label": "Feishu",
       "selectionLabel": "Feishu/Lark (飞书)",
-      "docsPath": "/channels/feishu",
+      "docsPath": "/channels/feishu-china",
       "blurb": "飞书/Lark 企业消息",
       "aliases": [
         "lark"
@@ -36,10 +36,10 @@
       "./dist/index.js"
     ],
     "channel": {
-      "id": "feishu",
+      "id": "feishu-china",
       "label": "Feishu",
       "selectionLabel": "Feishu/Lark (飞书)",
-      "docsPath": "/channels/feishu",
+      "docsPath": "/channels/feishu-china",
       "blurb": "飞书/Lark 企业消息",
       "aliases": [
         "lark"
@@ -57,10 +57,10 @@
       "./dist/index.js"
     ],
     "channel": {
-      "id": "feishu",
+      "id": "feishu-china",
       "label": "Feishu",
       "selectionLabel": "Feishu/Lark (飞书)",
-      "docsPath": "/channels/feishu",
+      "docsPath": "/channels/feishu-china",
       "blurb": "飞书/Lark 企业消息",
       "aliases": [
         "lark"
