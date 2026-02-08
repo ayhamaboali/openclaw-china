@@ -42,16 +42,17 @@
       <td align="center">✅ 可用</td>
       <td><a href="doc/guides/qqbot/configuration.md">QQ 渠道配置指南</a></td>
     </tr>
+      <tr>
+      <td>企业微信（智能机器人）</td>
+      <td align="center">✅ 可用</td>
+      <td><a href="doc/guides/wecom/configuration.md">企业微信智能机器人配置指南</a></td>
+    </tr>
     <tr>
       <td>飞书</td>
       <td align="center">✅ 可用</td>
       <td>-</td>
     </tr>
-    <tr>
-      <td>企业微信（智能机器人）</td>
-      <td align="center">✅ 可用</td>
-      <td>-</td>
-    </tr>
+  
   </tbody>
 </table>
 
@@ -267,6 +268,8 @@ MarkDown需申请相关权限。
 
 <details>
 <summary><strong>企业微信（智能机器人）</strong></summary>
+
+> 📖 **[企业微信智能机器人配置指南](doc/guides/wecom/configuration.md)**
 
 > 企业微信智能机器人（API 模式）通过公网 HTTPS 回调接收消息，仅支持被动回复
 
