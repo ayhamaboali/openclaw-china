@@ -149,3 +149,43 @@ openclaw gateway --port 18789 --verbose
 ```bash
 openclaw daemon start
 ```
+
+---
+
+## 五、可选操作：开启语音转文本
+
+如果你希望 QQ 语音消息可以自动转文字后再交给 Agent 处理，可按下面步骤配置腾讯云 ASR（录音文件识别极速版）。
+
+### 1. 开通 ASR 服务
+
+访问腾讯云语音识别产品页并点击“立即使用”：  
+https://cloud.tencent.com/product/asr
+
+说明：腾讯云 ASR 提供每月免费额度（以腾讯云控制台最新计费规则为准），额度如下：
+- 录音文件识别极速版（`asr/flash/v1`）：5 小时/月
+
+![image-20260209225153145](D:\work\code\moltbot-china\doc\images\image-20260209225153145.png)
+
+### 2. 创建 API 密钥
+
+进入腾讯云控制台语音识别页（或对应 API 密钥管理页）创建密钥，获取：
+- `appId`
+- `secretId`
+- `secretKey`
+
+控制台入口：  
+https://console.cloud.tencent.com/asr
+
+![image-20260209225210645](D:\work\code\moltbot-china\doc\images\image-20260209225210645.png)
+
+![image-20260209225226538](D:\work\code\moltbot-china\doc\images\image-20260209225226538.png)
+
+### 3. 在 OpenClaw 中配置
+
+```bash
+openclaw config set channels.qqbot.asr.enabled true
+openclaw config set channels.qqbot.asr.appId your-tencent-app-id
+openclaw config set channels.qqbot.asr.secretId your-tencent-secret-id
+openclaw config set channels.qqbot.asr.secretKey your-tencent-secret-key
+```
+
